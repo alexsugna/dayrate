@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h3>Create a Group</h3>
+<body style="text-align: center;">
+  <div class="well">
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.name.label }}<br>
+            {{ form.name(size=32) }}
+            {% for error in form.name.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.include_user() }} {{ form.include_user.label }}</p>
+        <p>{{ form.submit() }}</p>
+    </form>
+  </div>
+</body>
+{% endblock %}

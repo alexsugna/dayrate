@@ -1,0 +1,2 @@
+Fill in date when today is checked (pick_day.html)
+Customize number of ratings shown on dashboard

@@ -1,0 +1,7 @@
+runtime: python37
+
+env_variables:
+  CLOUD_SQL_USERNAME: dayrate
+  CLOUD_SQL_PASSWORD: dayrate_password
+  CLOUD_SQL_DATABASE_NAME: dayrate
+  CLOUD_SQL_CONNECTION_NAME: dayrate-293919:us-east1:dayrate

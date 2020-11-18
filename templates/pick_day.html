@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h3>Pick a Day to Rate</h3>
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <p>YYYY-MM-DD</p>
+    <p>
+        {{ form.day(class_='datepicker') }}<br>
+        {% for error in form.day.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </p>
+    <p>{{ form.today() }} {{ form.today.label }}</p>
+    <p>{{ form.submit() }}</p>
+</form>
+{% endblock %}

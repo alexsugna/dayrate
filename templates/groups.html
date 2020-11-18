@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 style="text-align: center;">Your Groups</h2>
+<div>
+  <div style="text-align: center;">
+      {% for group in groups %}
+      <p><strong>{{ group }}</strong></p>
+      {% endfor %}
+  </div>
+  <div style="text-align: center;">
+      <a href="/create_group">Create a Group</a>
+  </div>
+</div>
+{% endblock %}
