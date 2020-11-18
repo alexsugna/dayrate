@@ -7,6 +7,7 @@ from config import Config
 import formats
 import flask
 import stats
+from urllib.parse import quote_plus
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -57,6 +58,18 @@ def dash():
     return render_template('dash.html', title="{}'s Dashboard".format(username),
                            dash_info=dash_info, dash_stats=dash_stats)
 
+@app.route('/day_info_link', methods=['GET', 'POST'])
+def day_info_link():
+    check_login()
+    day = request.args.get('day')
+    day_information = day_info(day, session['username'])
+    try:
+        del day_information['_id']
+    except KeyError:
+        pass
+    session['day_information'] = day_information
+    return redirect('day_info')
+
 
 @app.route('/day_info', methods=['GET', 'POST'])
 def day_info_get():
@@ -105,7 +118,7 @@ def groups():
     my_groups = db.get_my_groups(username)
     groups = []
     for group in my_groups:
-        groups.append(group['name'])
+        groups.append((quote_plus(group['name']), group['name']))
     return render_template('groups.html', title="{}'s Groups".format(username),
                            groups=groups)
 
@@ -118,6 +131,18 @@ def create_group():
         flash(feedback)
         return redirect("/groups")
     return render_template('create_group.html', title="Create Group", form=form)
+
+@app.route('/display_group', methods=['POST', 'GET'])
+def display_group(): # this process needs validation/feedback
+    check_login()
+    group_name = request.args.get('group_name')
+    group_data = db.get_group_data(session['username'], group_name)[0]
+    group_users = group_data['users']
+    owner = False
+    if group_data['owner'] == session['username']:
+        owner = True
+    return render_template("group_display.html", title=group_name, group_users=group_users,
+                           group_name=group_name, owner=owner)
 
 def check_login():
     if 'username' in session:

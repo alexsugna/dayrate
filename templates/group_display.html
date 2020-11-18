@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 style="text-align: center;">{{ group_name }}</h2>
+<div>
+  <h4 style="text-align: center;">Group Members:</h4>
+  <div style="text-align: center;">
+      {% for user in group_users %}
+      <p><strong>{{ user }}</strong></p>
+      {% endfor %}
+  </div>
+
+  <div style="text-align: center;">
+    <p><a href="/group_dash">{{ group_name }}'s Dashboard</a></p>
+    {% if owner:%}
+      <p><a href="/delete_group">Delete Group</a></p>
+      <p><a href="/add_user_to_group">Add Users</a></p>
+      <p><a href="/change_group_owner">Change Owner</a></p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

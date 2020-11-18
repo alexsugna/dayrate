@@ -1,6 +1,7 @@
 import pymongo
 from bson.objectid import ObjectId
 from datetime import date
+from urllib.parse import quote_plus
 
 ROOT_USER = "admin"
 ROOT_PWD = "password"
@@ -111,7 +112,7 @@ def get_dash_info(username):
     past_n_days = get_past_n_days(username, 10)
     ratings = []
     for rating in past_n_days:
-        ratings.append((rating['day'], rating['rating']))
+        ratings.append((rating['day'], rating['rating'], quote_plus(rating['day'])))
     return ratings
 
 def get_past_n_days(username, n):
@@ -124,7 +125,10 @@ def get_past_n_days(username, n):
 def get_my_groups(username):
     client = get_client()
     groups_collection = client["groups"]
-    query = { "users" : username }
+    query = {"$or":[ {"users" : username },
+                     {"created_by" : username},
+                     {"users" : username},
+                     {"owner" : username} ]}
     results = groups_collection.find(query)
     return unwrap_query_results(results)
 
@@ -138,7 +142,8 @@ def create_group(group_name, username, include_user):
     client = get_client()
     groups_collection = client["groups"]
     group_entry = {"name" : group_name, "created_by" : username,
-                   "users" : [], "create_date" : get_today()}
+                   "users" : [], "create_date" : get_today(),
+                   "owner" : username}
     if include_user:
         group_entry["users"].append(username)
     result = groups_collection.insert_one(group_entry)
@@ -150,3 +155,12 @@ def create_group(group_name, username, include_user):
 def get_today():
     datetime = date.today()
     return str(datetime.year) + "-" + str(datetime.month) + "-" + str(datetime.day)
+
+def get_group_data(username, group_name):
+    client = get_client()
+    groups_collection = client["groups"]
+    result = groups_collection.find({"$and": [ {"name" : group_name},
+                                    {"$or": [ {"created_by" : username},
+                                    {"users" : username},
+                                    {"owner" : username}]}]})
+    return unwrap_query_results(result)

@@ -5,7 +5,7 @@
 <div>
   <div style="text-align: center;">
       {% for group in groups %}
-      <p><strong>{{ group }}</strong></p>
+      <p><strong><a href={{ "/display_group?group_name={}".format(group[0]) }}>{{ group[1] }}</a></strong></p>
       {% endfor %}
   </div>
   <div style="text-align: center;">
