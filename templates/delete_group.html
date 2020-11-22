@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 style="text-align: center;">Delete {{ group_name }} ?</h1>
+<body style="text-align: center;">
+  <div class="well">
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>{{ form.submit() }}</p>
+    </form>
+  </div>
+</body>
+{% endblock %}

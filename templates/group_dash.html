@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h3 style="text-align: center;">{{ group_name }} Dashboard</h3>
+<body>
+  <div class="ct-chart ct-perfect-fourth"></div>
+
+  <script>
+    var data = $.get({{ "/group_dash_data?group_name={}".format(group_name_encoded) }});
+    var extract = data.done(function (response) {
+      var obj = new BasicChart(response.x, response.y, "Days", "Rating");
+      obj.createGraph();
+    })
+  </script>
+</body>
+{% endblock %}

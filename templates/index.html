@@ -6,4 +6,19 @@
   <h3 style="text-align: center;">Welcome To DayRate!</h3>
 
 </body>
+
+<body>
+  <div class="ct-chart ct-perfect-fourth"></div>
+
+  <script>
+
+    var XData= ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+    var YData = [5.5, 7, 3.8, 4.3, 5.1];
+    var obj = new BasicChart(XData, YData, "Days", "Ratings");
+
+    obj.createGraph();
+
+  </script>
+</body>
+
 {% endblock %}

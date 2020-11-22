@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateField, FloatField, TextAreaField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateField, FloatField, TextAreaField, SelectField
 from wtforms.validators import DataRequired, Optional
 from wtforms import validators
 
@@ -43,3 +43,14 @@ class CreateGroup(FlaskForm):
     name = StringField('Group Name', validators=[DataRequired()])
     include_user = BooleanField('Include yourself in Group')
     submit = SubmitField('Create Group')
+
+class AddUserToGroupForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    submit = SubmitField('Add User')
+
+class ChangeGroupOwnerForm(FlaskForm):
+    new_owner = SelectField('New Owner', choices=None, validators=[DataRequired()])
+    submit = SubmitField('Change Owner')
+
+class DeleteGroupForm(FlaskForm):
+    submit = SubmitField('Permanently Delete Group')

@@ -1,0 +1,14 @@
+{
+  "name": "dayrate",
+  "homepage": "https://github.com/alexsugna/dayrate",
+  "description": "bower.json file for chartist",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

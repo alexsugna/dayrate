@@ -2,6 +2,7 @@
 
 {% block content %}
 <h3 style="text-align: center;">Dashboard</h3>
+
 <div style="text-align: center;">
   <a style="text-align: center;" href="/pick_day">Rate a Day<a>
 </div>
@@ -18,4 +19,16 @@
   <p>{{ stat_element["stat_name"] ~ ': ' ~ stat_element["stat"] }}</p>
   {% endfor %}
 </div>
+
+<body>
+  <div class="ct-chart ct-perfect-fourth"></div>
+
+  <script>
+    var data = $.get('dash_data');
+    var extract = data.done(function (response) {
+      var obj = new BasicChart(response.x, response.y, "Days", "Rating");
+      obj.createGraph();
+    })
+  </script>
+</body>
 {% endblock %}

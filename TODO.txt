@@ -1,2 +1,4 @@
 Fill in date when today is checked (pick_day.html)
 Customize number of ratings shown on dashboard
+Fix threshold chartist plugin
+Have user confirm invitation to group. Right now we add them automatically

@@ -1,0 +1,14 @@
+# modules
+node_modules/
+bower_components/
+
+# build
+.tmp/
+# dist/
+
+# generated
+.sass-cache
+.grunt
+
+# debug
+npm-debug.log

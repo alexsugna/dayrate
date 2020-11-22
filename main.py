@@ -58,6 +58,18 @@ def dash():
     return render_template('dash.html', title="{}'s Dashboard".format(username),
                            dash_info=dash_info, dash_stats=dash_stats)
 
+@app.route('/dash_data', methods=["GET", "POST"])
+def dash_data():
+    check_login()
+    dash_info = db.get_dash_info(session['username'])
+    days = []
+    ratings = []
+    for rating in dash_info:
+        days.append(rating[0])
+        ratings.append(rating[1])
+    data = { "x" : days, "y" : ratings}
+    return data
+
 @app.route('/day_info_link', methods=['GET', 'POST'])
 def day_info_link():
     check_login()
@@ -136,13 +148,97 @@ def create_group():
 def display_group(): # this process needs validation/feedback
     check_login()
     group_name = request.args.get('group_name')
-    group_data = db.get_group_data(session['username'], group_name)[0]
+    group_data = db.get_group_data(session['username'], group_name)
+    if len(group_data) < 1:
+        return redirect('/groups')
+    group_data = group_data[0]
     group_users = group_data['users']
     owner = False
-    if group_data['owner'] == session['username']:
+    owner_username = group_data['owner']
+    if owner_username == session['username']:
         owner = True
+    encoded = (quote_plus(group_name), quote_plus(owner_username))
     return render_template("group_display.html", title=group_name, group_users=group_users,
-                           group_name=group_name, owner=owner)
+                           group_name=group_name, owner=owner, encoded=encoded)
+
+@app.route('/group_dash', methods=['POST', 'GET'])
+def group_dash(): # this process needs validation/feedback
+    """
+    NEEDS A LOT OF WORK :)
+    """
+    group_name = request.args.get('group_name')
+    group_data = db.get_group_data(session['username'], group_name)#[0]
+    group_users = group_data[0]['users']
+    group_dash_info = []
+    for username in group_users:
+        group_dash_info.append((username, db.get_dash_info(username)))
+    return render_template("group_dash.html", title="{} Dashboard".format(group_name),
+                           group_dash_info=group_dash_info, group_name=group_name,
+                           group_name_encoded=quote_plus(group_name))
+
+@app.route('/group_dash_data', methods=['POST', 'GET'])
+def group_dash_data():
+    check_login()
+    group_name = request.args.get('group_name')
+    dash_info = db.get_group_dash_data()
+    days = []
+    ratings = []
+    for rating in dash_info:
+        days.append(rating[0])
+        ratings.append(rating[1])
+    data = { "x" : days, "y" : ratings}
+    return data
+
+
+@app.route('/add_user_to_group', methods=['POST', 'GET'])
+def add_user_to_group():
+    check_login()
+    form = forms.AddUserToGroupForm()
+    group_name = request.args.get('group_name')
+    if form.validate_on_submit():
+        username_to_add = form.username.data
+        if len(db.find_user(username_to_add)) >= 1:
+            insert_result, feedback, _ = db.insert_user_to_group(username_to_add, group_name, session['username'])
+            flash(feedback)
+            if insert_result:
+                return redirect("/display_group?group_name={}".format(quote_plus(group_name)))
+            return render_template('add_user_to_group.html', form=form, group_name=group_name)
+        flash("Username not found :(")
+    return render_template('add_user_to_group.html', form=form, group_name=group_name)
+
+
+@app.route('/change_group_owner', methods=['POST', 'GET'])
+def change_group_owner():
+    check_login()
+    group_name = request.args.get('group_name')
+    user_list = db.get_group_data(session['username'], group_name)[0]['users']
+    form = forms.ChangeGroupOwnerForm()
+    form.new_owner.choices = user_list
+    if form.validate_on_submit():
+        new_owner = form.new_owner.data
+        if len(db.find_user(new_owner)) >= 1:
+            current_owner = request.args.get('current_owner')
+            update_result, feedback, _ = db.change_group_owner(current_owner, new_owner, group_name)
+            flash(feedback)
+            if update_result:
+                return redirect("/display_group?group_name={}".format(quote_plus(group_name)))
+    return render_template('change_group_owner.html', form=form, group_name=group_name, user_list=user_list)
+
+
+@app.route('/delete_group', methods=['POST', 'GET'])
+def delete_group():
+    check_login()
+    group_name = request.args.get('group_name')
+    delete_form = forms.DeleteGroupForm()
+    if delete_form.validate_on_submit():
+        username = session['username']
+        if username == db.get_group_data(username, group_name)[0]['owner']:
+            delete_result, feedback, _ = db.delete_group(username, group_name)
+            flash(feedback)
+            if delete_result:
+                return redirect("/display_group?group_name={}".format(quote_plus(group_name)))
+    return render_template('delete_group.html', form=delete_form, group_name=group_name)
+
 
 def check_login():
     if 'username' in session:

@@ -8,6 +8,7 @@ ROOT_PWD = "password"
 SERVER_PUBLIC_IP = "3.21.227.42"
 
 connection_string = "mongodb://{}:{}@{}/admin".format(ROOT_USER, ROOT_PWD, SERVER_PUBLIC_IP)
+bad_result = False, "Something went wrong :/ Try again?", None
 
 def get_client():
     """
@@ -68,7 +69,7 @@ def validate_account_creation(user, password, reenter_password):
         if result.acknowledged:
             return True, "Account created successfully!", result.inserted_id
         else:
-            return False, "Something went wrong :/ Try again?", None
+            return bad_result
 
 def day_info(date, username):
     """
@@ -96,7 +97,7 @@ def save_dayrate(day_information, username):
         if result.acknowledged:
             return True, "DayRate input successfully", result.inserted_id
         else:
-            return False, "Something went wrong :/ Try again?", None
+            return bad_result
     else:
         rating_id = day_result['_id']
         update_result = days_collection.replace_one({ "username" : username, "day" : day_information["day"]},
@@ -104,7 +105,7 @@ def save_dayrate(day_information, username):
         if update_result.acknowledged:
             return True, "DayRate input successfully", None
         else:
-            return False, "Something went wrong :/ Try again?", None
+            return bad_result
 
 def get_dash_info(username):
     client = get_client()
@@ -150,7 +151,7 @@ def create_group(group_name, username, include_user):
     if result.acknowledged:
         return True, "{} created successfully!".format(group_name), result.inserted_id
     else:
-        return False, "Something went wrong :/ Try again?", None
+        return bad_result
 
 def get_today():
     datetime = date.today()
@@ -163,4 +164,48 @@ def get_group_data(username, group_name):
                                     {"$or": [ {"created_by" : username},
                                     {"users" : username},
                                     {"owner" : username}]}]})
+
     return unwrap_query_results(result)
+
+def find_user(username):
+    client = get_client()
+    users_collection = client["users"]
+    user_results = users_collection.find({"username" : username})
+    return unwrap_query_results(user_results)
+
+
+def insert_user_to_group(username_to_add, group_name, username):
+    client = get_client()
+    groups_collection = client["groups"]
+    group_data = get_group_data(username, group_name)
+    if username_to_add in group_data[0]['users']:
+        return False, "{} is already in {}".format(username_to_add, group_name), None
+    insert_result = groups_collection.update({"name" : group_name, "owner" : username},
+                                             {"$push" : {"users" : username_to_add}})
+    if insert_result['updatedExisting']:
+        return True, "{} added to {}".format(username_to_add, group_name), None
+    else:
+        return bad_result
+
+
+def change_group_owner(current_owner, new_owner, group_name):
+    client = get_client()
+    groups_collection = client["groups"]
+    update_result = groups_collection.update_one({"name" : group_name, "owner" : current_owner},
+                                             {"$set" : {"owner" : new_owner}})
+    if update_result.acknowledged:
+        return True, "{} is the new owner of {}".format(new_owner, group_name), None
+    return bad_result
+
+def delete_group(owner_name, group_name):
+    client = get_client()
+    groups_collection = client["groups"]
+    delete_result = groups_collection.delete_one({"owner" : owner_name, "name" : group_name})
+    if delete_result.acknowledged:
+        return True, "{} was successfully deleted".format(group_name), None
+    return bad_result
+
+def get_group_dash_data(username, group_name):
+    group_users = get_group_data(username, group_name)[0]['users']
+    for user in group_users:
+        user_data = get_dash_info(user)
