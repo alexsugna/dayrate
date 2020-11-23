@@ -8,6 +8,7 @@ import formats
 import flask
 import stats
 from urllib.parse import quote_plus
+import datetime
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -39,7 +40,7 @@ def logout():
 def create_account():
     form = forms.CreateAccountForm()
     if form.validate_on_submit():
-        success, feedback = validate_account_creation(form.username.data,
+        success, feedback, _ = validate_account_creation(form.username.data,
                                              form.password.data,
                                              form.reenter_password.data)
         flash(feedback)
@@ -66,7 +67,11 @@ def dash_data():
     ratings = []
     for rating in dash_info:
         days.append(rating[0])
-        ratings.append(rating[1])
+    days.sort(key = lambda date: datetime.datetime.strptime(date, formats.date))
+    for day in days:
+        for rating in dash_info:
+            if rating[0] == day:
+                ratings.append(rating[1])
     data = { "x" : days, "y" : ratings}
     return data
 
@@ -162,31 +167,26 @@ def display_group(): # this process needs validation/feedback
                            group_name=group_name, owner=owner, encoded=encoded)
 
 @app.route('/group_dash', methods=['POST', 'GET'])
-def group_dash(): # this process needs validation/feedback
-    """
-    NEEDS A LOT OF WORK :)
-    """
+def group_dash():
+    check_login()
     group_name = request.args.get('group_name')
-    group_data = db.get_group_data(session['username'], group_name)#[0]
+    username = session['username']
+    group_data = db.get_group_data(username, group_name)#[0]
     group_users = group_data[0]['users']
-    group_dash_info = []
-    for username in group_users:
-        group_dash_info.append((username, db.get_dash_info(username)))
+    group_user_stats = stats.group_user_stats(group_users, 10)
+    summary_stats = stats.group_summary(group_users, 10)
     return render_template("group_dash.html", title="{} Dashboard".format(group_name),
-                           group_dash_info=group_dash_info, group_name=group_name,
-                           group_name_encoded=quote_plus(group_name))
+                           group_user_stats=group_user_stats, group_name=group_name,
+                           group_name_encoded=quote_plus(group_name),
+                           summary_stats=summary_stats)
 
 @app.route('/group_dash_data', methods=['POST', 'GET'])
 def group_dash_data():
     check_login()
     group_name = request.args.get('group_name')
-    dash_info = db.get_group_dash_data()
-    days = []
-    ratings = []
-    for rating in dash_info:
-        days.append(rating[0])
-        ratings.append(rating[1])
-    data = { "x" : days, "y" : ratings}
+    days, ratings, labels = db.get_group_dash_data(session['username'], group_name)
+    print(labels)
+    data = { "x" : days, "y" : ratings, "labels" : labels}
     return data
 
 

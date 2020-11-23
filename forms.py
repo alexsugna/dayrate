@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateField, FloatField, TextAreaField, SelectField
 from wtforms.validators import DataRequired, Optional
 from wtforms import validators
+import formats
 
 class OptionalIfFieldEqualTo(Optional):
     # modified from https://stackoverflow.com/questions/8463209/how-to-make-a-field-conditionally-optional-in-wtforms
@@ -30,7 +31,7 @@ class CreateAccountForm(FlaskForm):
     submit = SubmitField('Create Account')
 
 class PickDayForm(FlaskForm):
-    day = DateField('Day', format='%Y-%m-%d', validators=[OptionalIfFieldEqualTo('today', value=True)])
+    day = DateField('Day', format=formats.date, validators=[OptionalIfFieldEqualTo('today', value=True)])
     today = BooleanField('Today')
     submit = SubmitField('Choose Day')
 

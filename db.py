@@ -1,7 +1,9 @@
 import pymongo
 from bson.objectid import ObjectId
 from datetime import date
+import datetime
 from urllib.parse import quote_plus
+import formats
 
 ROOT_USER = "admin"
 ROOT_PWD = "password"
@@ -99,7 +101,6 @@ def save_dayrate(day_information, username):
         else:
             return bad_result
     else:
-        rating_id = day_result['_id']
         update_result = days_collection.replace_one({ "username" : username, "day" : day_information["day"]},
                                                      day_information)
         if update_result.acknowledged:
@@ -206,6 +207,34 @@ def delete_group(owner_name, group_name):
     return bad_result
 
 def get_group_dash_data(username, group_name):
+    """
+    This can totally be optimized at some later point
+    """
     group_users = get_group_data(username, group_name)[0]['users']
-    for user in group_users:
-        user_data = get_dash_info(user)
+    data = {}
+    user_datas = {}
+    for username in group_users:
+        user_data = get_dash_info(username)
+        user_datas.update({username : user_data})
+        for day_tuple in user_data:
+            day = day_tuple[0]
+            if day not in data.keys():
+                data.update({day : {}})
+
+    for day in data.keys():
+        for username in user_datas.keys():
+            user_data_dic = data[day]
+            user_data_dic.update({username : None})
+            for rating in user_datas[username]:
+                if rating[0] == day:
+                    user_data_dic[username] = rating[1]
+    days = list(data.keys())
+    days.sort(key = lambda date: datetime.datetime.strptime(date, formats.date))
+    ratings = []
+    for username in user_datas.keys():
+        ratings_by_day = []
+        for day in days:
+            rating = data[day][username]
+            ratings_by_day.append(rating)
+        ratings.append(ratings_by_day)
+    return days, ratings, list(user_datas.keys())

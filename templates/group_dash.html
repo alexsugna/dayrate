@@ -2,15 +2,33 @@
 
 {% block content %}
 <h3 style="text-align: center;">{{ group_name }} Dashboard</h3>
+<h3 style="text-align: center;">Individual Stats</h3>
+<div class="well" style="text-align: center;">
+  {% for user_stats in group_user_stats %}
+    <h4 style="text-align: center;">{{ user_stats[0] }}</h3>
+    {% for stat_element in user_stats[1] %}
+      <p>{{ stat_element["stat_name"] ~ ': ' ~ stat_element["stat"] }}</p>
+    {% endfor %}
+  {% endfor %}
+</div>
 <body>
   <div class="ct-chart ct-perfect-fourth"></div>
 
   <script>
-    var data = $.get({{ "/group_dash_data?group_name={}".format(group_name_encoded) }});
+    var data = $.get('{{ "/group_dash_data?group_name={}".format(group_name_encoded) }}');
     var extract = data.done(function (response) {
-      var obj = new BasicChart(response.x, response.y, "Days", "Rating");
+      console.log(response.x)
+      console.log(response.y)
+      var obj = new GroupDashChart(response.x, response.y, "Days", "Rating", response.labels);
       obj.createGraph();
     })
   </script>
 </body>
+
+<h3 style="text-align: center;">{{ group_name }} Culmulative Stats</h3>
+<div class="well" style="text-align: center;">
+  {% for stat_element in summary_stats %}
+  <p>{{ stat_element["stat_name"] ~ ': ' ~ stat_element["stat"] }}</p>
+  {% endfor %}
+</div>
 {% endblock %}

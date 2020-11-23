@@ -7,6 +7,7 @@
 <!-- Chartist plugins -->
 <script src="{{url_for('static', filename='chartist_plugins/chartist-plugin-axistitle-master/dist/chartist-plugin-axistitle.min.js')}}"></script>
 <script src="{{url_for('static', filename='chartist_plugins/chartist-plugin-threshold-master/dist/chartist-plugin-threshold.min.js')}}"></script>
+<!-- <script src="{{url_for('static', filename='chartist_plugins/chartist-plugin-legend-master/chartist-plugin-legend.js')}}"></script> -->
 
 <!-- Bootstraps Java Scipts Links -->
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
@@ -69,23 +70,19 @@
               flipTitle: true
             }
           })
-        ,[
-          Chartist.plugins.ctThreshold({
-            threshold: 5
-          })
-        ]
       ]});
     }
   }
 
   class GroupDashChart{
 
-    constructor(XData, YData, XLabel, YLabel)
+    constructor(XData, YData, XLabel, YLabel, labels)
     {
       this.XData = XData;
       this.YData = YData;
       this.XLabel = XLabel;
       this.YLabel = YLabel;
+      this.labels = labels;
     }
 
     createGraph()
@@ -97,7 +94,8 @@
               }
       new Chartist.Line(
         '.ct-chart',
-        data, {
+        data,
+         {
           showArea: true,
           axisY: {
             onlyInteger: true
@@ -122,12 +120,10 @@
               },
               flipTitle: true
             }
-          })
-        ,[
+          }),
           Chartist.plugins.ctThreshold({
             threshold: 5
           })
-        ]
       ]});
     }
   }
@@ -141,10 +137,10 @@
       {% endif %}
     </head>
     <body>
-      <ul>
+      <ul class="menu-bar">
         <li><a href="/" title="Home"><img src="{{url_for('static', filename='logo.png')}}" height="23"></a></li>
         {% if 'username' in session %}
-        <li><a href="/dash" title="Dashboard">Dashboard</a></li>
+        <li><a href="/dash" title="Dashboard">My Dashboard</a></li>
         <li><a href="/groups" title="Groups">Groups</a></li>
         <li><a href="/logout" title="Log Out">Log Out</a></li>
         {% else %}

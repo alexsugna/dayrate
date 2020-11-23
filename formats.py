@@ -6,6 +6,8 @@ day_information = {"day" : "",
                    "username": "",
                    "comments": ""}
 
+date = "%Y-%m-%d"
+
 def fill_day_info(form, day, username):
     day_information["day"] = day
     day_information["username"] = username
