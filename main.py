@@ -12,7 +12,6 @@ import datetime
 
 app = Flask(__name__)
 app.config.from_object(Config)
-app.secret_key = b'48hf9j98rfh_+==_98j9i'
 
 @app.route('/', methods=['POST','GET'])
 def home():

@@ -4,10 +4,9 @@ from datetime import date
 import datetime
 from urllib.parse import quote_plus
 import formats
+from config import ROOT_USER, ROOT_PWD, SERVER_PUBLIC_IP
 
-ROOT_USER = "admin"
-ROOT_PWD = "password"
-SERVER_PUBLIC_IP = "3.21.227.42"
+#sudo scp -r -i dayrate.pem dayrate ec2-user@ec2-18-221-31-5.us-east-2.compute.amazonaws.com:/home/ec2-user
 
 connection_string = "mongodb://{}:{}@{}/admin".format(ROOT_USER, ROOT_PWD, SERVER_PUBLIC_IP)
 bad_result = False, "Something went wrong :/ Try again?", None
