@@ -20,9 +20,25 @@
 
 <!-- JQuery links  -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 
 <!-- Define chart classes -->
 <script>
+  $(function(ready){
+    $("#today").change(function() {
+      console.log("TODAY");
+      var day;
+      if (this.checked) {
+          var now = new Date();
+          day = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
+      } else {
+          dateStr = "";
+      }
+      $("#day").val(day);
+    });
+  });
+
   class BasicChart{
 
     constructor(XData, YData, XLabel, YLabel)
