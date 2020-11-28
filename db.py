@@ -5,6 +5,7 @@ import datetime
 from urllib.parse import quote_plus
 import formats
 from config import ROOT_USER, ROOT_PWD, SERVER_PUBLIC_IP
+import default_preferences as dp
 
 
 """
@@ -65,6 +66,7 @@ def validate_account_creation(user, password, reenter_password):
     """
     client = get_client()
     users_collection = client["users"]
+    user_preferences_collection = client["user_preferences"]
     if password != reenter_password:
         return False, "Password does not match Re-enter password.", None
     username_query = {"username" : user}
@@ -73,7 +75,9 @@ def validate_account_creation(user, password, reenter_password):
         return False, "Username taken!", None
     else:
         result = users_collection.insert_one({"username" : user, "password" : password})
-        if result.acknowledged:
+        preferences_result = user_preferences_collection.insert_one({"num_ratings_display" : dp.num_ratings_display,
+                                                                     "num_ratings_stats" : dp.num_ratings_stats })
+        if result.acknowledged and preferences_result.acknowledged:
             return True, "Account created successfully!", result.inserted_id
         else:
             return bad_result
@@ -142,7 +146,12 @@ def get_dash_info(username):
     """
     client = get_client()
     days_collection = client["days"]
-    past_n_days = get_past_n_days(username, 10)
+    user_preferences = get_user_preferences(username)
+    if user_preferences is None:
+        n = dp.num_ratings_display
+    else:
+        n = user_preferences['num_ratings_display']
+    past_n_days = get_past_n_days(username, int(n))
     ratings = []
     for rating in past_n_days:
         ratings.append((rating['day'], rating['rating'], quote_plus(rating['day'])))
@@ -217,13 +226,19 @@ def create_group(group_name, username, include_user):
     """
     client = get_client()
     groups_collection = client["groups"]
+    group_preferences_collection = client["group_preferences"]
     group_entry = {"name" : group_name, "created_by" : username,
                    "users" : [], "create_date" : get_today(),
                    "owner" : username}
     if include_user:
         group_entry["users"].append(username)
     result = groups_collection.insert_one(group_entry)
-    if result.acknowledged:
+    preferences_result = group_preferences_collection.insert_one({"group_num_ratings_display" : dp.group_num_ratings_display,
+                                                                 "group_num_ratings_stats" : dp.group_num_ratings_stats,
+                                                                 "group_stat_decimals" : dp.group_stat_decimals,
+                                                                 "owner" : username,
+                                                                 "group_name" : group_name})
+    if result.acknowledged and preferences_result.acknowledged:
         return True, "{} created successfully!".format(group_name), result.inserted_id
     else:
         return bad_result
@@ -326,8 +341,10 @@ def delete_group(owner_name, group_name):
     """
     client = get_client()
     groups_collection = client["groups"]
+    group_preferences_collection = client["group_preferences"]
     delete_result = groups_collection.delete_one({"owner" : owner_name, "name" : group_name})
-    if delete_result.acknowledged:
+    delete_preferences_result = group_preferences_collection.delete_one({"owner" : owner_name, "group_name" : group_name})
+    if delete_result.acknowledged and delete_preferences_result.acknowledged:
         return True, "{} was successfully deleted".format(group_name), None
     return bad_result
 
@@ -371,3 +388,48 @@ def get_group_dash_data(username, group_name):
             ratings_by_day.append(rating)
         ratings.append(ratings_by_day)
     return days, ratings, list(user_datas.keys())
+
+def get_user_preferences(username):
+    client = get_client()
+    user_preferences_collection = client["user_preferences"]
+    result = user_preferences_collection.find({ "username" : username })
+    unwrapped_results = unwrap_query_results(result)
+    if len(unwrapped_results) < 1:
+        return None
+    else:
+        return unwrapped_results[0]
+
+def save_user_preferences(preferences_form, username):
+    client = get_client()
+    user_preferences_collection = client["user_preferences"]
+    result = user_preferences_collection.update_one({"username" : username},
+                                                    { "$set" : {"num_ratings_display" : preferences_form.num_ratings_display.data,
+                                                                "num_ratings_stats" : preferences_form.num_ratings_stats.data,
+                                                                "stat_decimals" : preferences_form.stat_decimals.data}})
+    if result.acknowledged:
+        return True, "Preferences updated successfully!", None
+    else:
+        return bad_result
+
+def get_group_preferences(group_name, username):
+    client = get_client()
+    group_preferences_collection = client["group_preferences"]
+    query = { "name" : group_name, "owner" : username}
+    result = group_preferences_collection.find(query)
+    unwrapped_results = unwrap_query_results(result)
+    if len(unwrapped_results) < 1:
+        return None
+    else:
+        return unwrapped_results[0]
+
+def save_group_preferences(preferences_form, username, group_name):
+    client = get_client()
+    group_preferences_collection = client["group_preferences"]
+    result = group_preferences_collection.update_one({"owner" : username, "name" : group_name},
+                                                    { "$set" : {"group_num_ratings_display" : preferences_form.group_num_ratings_display.data,
+                                                                "group_num_ratings_stats" : preferences_form.group_num_ratings_stats.data,
+                                                                "group_stat_decimals" : preferences_form.group_stat_decimals.data}})
+    if result.acknowledged:
+        return True, "Group preferences updated successfully!", None
+    else:
+        return bad_result

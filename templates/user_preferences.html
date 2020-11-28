@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h3>{{ username }}'s Preferences</h3>
+<body style="text-align: center;">
+  <div class="well">
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>{{ form.num_ratings_display() }}
+           {{ form.num_ratings_display.label }}
+           {% for error in form.num_ratings_display.errors %}
+           <span style="color: red;">[{{ error }}]</span>
+           {% endfor %}
+         </p>
+         <p>{{ form.num_ratings_stats() }}
+            {{ form.num_ratings_stats.label }}
+            {% for error in form.num_ratings_stats.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+          </p>
+          <p>{{ form.stat_decimals() }}
+             {{ form.stat_decimals.label }}
+             {% for error in form.stat_decimals.errors %}
+             <span style="color: red;">[{{ error }}]</span>
+             {% endfor %}
+           </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+  </div>
+</body>
+{% endblock %}

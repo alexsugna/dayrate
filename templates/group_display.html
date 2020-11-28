@@ -13,9 +13,10 @@
   <div style="text-align: center;">
     <p><a href={{ "/group_dash?group_name={}".format(encoded[0]) }}>{{ group_name }}'s Dashboard</a></p>
     {% if owner:%}
-      <p><a href={{ "/delete_group?group_name={}".format(encoded[0]) }}>Delete Group</a></p>
       <p><a href={{ "/add_user_to_group?group_name={}".format(encoded[0]) }}>Add Users</a></p>
       <p><a href={{ "/change_group_owner?group_name={}&current_owner={}".format(encoded[0], encoded[1]) }}>Change Owner</a></p>
+      <p><a href={{ "/group_preferences?group_name={}".format(encoded[0]) }}>Group Preferences</a></p>
+      <p><a href={{ "/delete_group?group_name={}".format(encoded[0]) }}>Delete Group</a></p>
     {% endif %}
   </div>
 </div>

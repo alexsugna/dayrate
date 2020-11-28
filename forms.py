@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateField, FloatField, TextAreaField, SelectField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateField, FloatField, TextAreaField, SelectField, IntegerField
 from wtforms.validators import DataRequired, Optional
 from wtforms import validators
 import formats
@@ -55,3 +55,15 @@ class ChangeGroupOwnerForm(FlaskForm):
 
 class DeleteGroupForm(FlaskForm):
     submit = SubmitField('Permanently Delete Group')
+
+class UserPreferencesForm(FlaskForm):
+    num_ratings_display = IntegerField('Max ratings shown on dashboard (integer)', validators=[DataRequired()])
+    num_ratings_stats = IntegerField('Max ratings used to calculate stats (integer)', validators=[DataRequired()])
+    stat_decimals = IntegerField('Decimal precision of stats (integer)', validators=[DataRequired()])
+    submit = SubmitField('Save User Preferences')
+
+class GroupPreferencesForm(FlaskForm):
+    group_num_ratings_display = IntegerField('Max ratings shown on group dashboard (integer)', validators=[DataRequired()])
+    group_num_ratings_stats = IntegerField('Max ratings used to calculate group stats (integer)', validators=[DataRequired()])
+    group_stat_decimals = IntegerField('Decimal precision of group stats (integer)', validators=[DataRequired()])
+    submit = SubmitField('Save Group Preferences')
