@@ -6,6 +6,7 @@ from urllib.parse import quote_plus
 import formats
 from config import ROOT_USER, ROOT_PWD, SERVER_PUBLIC_IP
 import default_preferences as dp
+import bcrypt as b
 
 
 """
@@ -16,6 +17,7 @@ Bash command for transferring directory to server:
 
 connection_string = "mongodb://{}:{}@{}/admin".format(ROOT_USER, ROOT_PWD, SERVER_PUBLIC_IP)    # string for connecting to mongoDB
 bad_result = False, "Something went wrong :/ Try again?", None                                  # generic error response
+salt = bcrypt.gensalt()
 
 
 def get_client():
@@ -42,7 +44,9 @@ def validate_login(user, pword):
     """
     client = get_client()                                                       # construct client
     users_collection = client["users"]                                          # get 'users' collection
-    query = {"username" : user, "password" : pword}                             # generate username and password query
+    # hashed_pword = bcrypt.hashpw(pword, salt)
+    # query = {"username" : user, "password" : hashed_pword}                      # generate username and password query
+    query = {"username" : user, "password" : pword}
     result = list(users_collection.find(query))                                 # return results of query in users collection
     if len(result) != 1:                                                        # if there are not one result, something was incorrect
         return False, "Username and password combination not found!", None      # return response
