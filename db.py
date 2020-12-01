@@ -6,7 +6,7 @@ from urllib.parse import quote_plus
 import formats
 from config import ROOT_USER, ROOT_PWD, SERVER_PUBLIC_IP
 import default_preferences as dp
-import bcrypt as b
+#import bcrypt as b
 
 
 """
@@ -17,7 +17,7 @@ Bash command for transferring directory to server:
 
 connection_string = "mongodb://{}:{}@{}/admin".format(ROOT_USER, ROOT_PWD, SERVER_PUBLIC_IP)    # string for connecting to mongoDB
 bad_result = False, "Something went wrong :/ Try again?", None                                  # generic error response
-salt = bcrypt.gensalt()
+#salt = bcrypt.gensalt()
 
 
 def get_client():
@@ -80,7 +80,9 @@ def validate_account_creation(user, password, reenter_password):
     else:
         result = users_collection.insert_one({"username" : user, "password" : password})
         preferences_result = user_preferences_collection.insert_one({"num_ratings_display" : dp.num_ratings_display,
-                                                                     "num_ratings_stats" : dp.num_ratings_stats })
+                                                                     "num_ratings_stats" : dp.num_ratings_stats,
+                                                                     "username" : user,
+                                                                     "stat_decimals" : dp.stat_decimals})
         if result.acknowledged and preferences_result.acknowledged:
             return True, "Account created successfully!", result.inserted_id
         else:
@@ -158,7 +160,8 @@ def get_dash_info(username):
     past_n_days = get_past_n_days(username, int(n))
     ratings = []
     for rating in past_n_days:
-        ratings.append((rating['day'], rating['rating'], quote_plus(rating['day'])))
+        ratings.append((rating['day'], rating['rating'], quote_plus(rating['day']),
+                        rating['comments']))
     return ratings
 
 
@@ -325,9 +328,13 @@ def change_group_owner(current_owner, new_owner, group_name):
     """
     client = get_client()
     groups_collection = client["groups"]
+    group_preferences_collection = client["group_preferences"]
     update_result = groups_collection.update_one({"name" : group_name, "owner" : current_owner},
                                              {"$set" : {"owner" : new_owner}})
-    if update_result.acknowledged:
+    preferences_update_result = group_preferences_collection.update_one(
+                                {"group_name" : group_name, "owner" : current_owner},
+                                {"$set" : {"owner" : new_owner}})
+    if update_result.acknowledged and preferences_update_result.acknowledged:
         return True, "{} is the new owner of {}".format(new_owner, group_name), None
     return bad_result
 
@@ -406,6 +413,7 @@ def get_user_preferences(username):
 def save_user_preferences(preferences_form, username):
     client = get_client()
     user_preferences_collection = client["user_preferences"]
+    print(preferences_form.num_ratings_display.data)
     result = user_preferences_collection.update_one({"username" : username},
                                                     { "$set" : {"num_ratings_display" : preferences_form.num_ratings_display.data,
                                                                 "num_ratings_stats" : preferences_form.num_ratings_stats.data,
@@ -415,10 +423,10 @@ def save_user_preferences(preferences_form, username):
     else:
         return bad_result
 
-def get_group_preferences(group_name, username):
+def get_group_preferences(group_name, owner):
     client = get_client()
     group_preferences_collection = client["group_preferences"]
-    query = { "name" : group_name, "owner" : username}
+    query = { "group_name" : group_name, "owner" : owner}
     result = group_preferences_collection.find(query)
     unwrapped_results = unwrap_query_results(result)
     if len(unwrapped_results) < 1:
@@ -429,7 +437,7 @@ def get_group_preferences(group_name, username):
 def save_group_preferences(preferences_form, username, group_name):
     client = get_client()
     group_preferences_collection = client["group_preferences"]
-    result = group_preferences_collection.update_one({"owner" : username, "name" : group_name},
+    result = group_preferences_collection.update_one({"owner" : username, "group_name" : group_name},
                                                     { "$set" : {"group_num_ratings_display" : preferences_form.group_num_ratings_display.data,
                                                                 "group_num_ratings_stats" : preferences_form.group_num_ratings_stats.data,
                                                                 "group_stat_decimals" : preferences_form.group_stat_decimals.data}})

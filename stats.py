@@ -46,13 +46,14 @@ def group_user_stats(group_users, n):
     return group_stats
 
 
-def group_summary(group_users, n):
+def group_summary(group_users, group_preferences):
     """
     returns a summary for the specified group
     """
     all_ratings = []
+    decimals = group_preferences['group_stat_decimals']
     for username in group_users:
-        all_ratings += last_n_ratings(username, n)
-    return [{"stat_name" : "mean", "stat" : round(np.mean(all_ratings), dp.group_stat_decimals)},
-            {"stat_name" : "std", "stat" : round(np.std(all_ratings), dp.group_stat_decimals)},
-            {"stat_name" : "sum", "stat" : round(np.sum(all_ratings), dp.group_stat_decimals)}]
+        all_ratings += last_n_ratings(username, group_preferences["group_num_ratings_stats"])
+    return [{"stat_name" : "mean", "stat" : round(np.mean(all_ratings), decimals)},
+            {"stat_name" : "std", "stat" : round(np.std(all_ratings), decimals)},
+            {"stat_name" : "sum", "stat" : round(np.sum(all_ratings), decimals)}]

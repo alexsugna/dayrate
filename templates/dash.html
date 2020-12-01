@@ -7,22 +7,48 @@
   <a style="text-align: center;" href="/pick_day">Rate a Day<a>
 </div>
 <div class="well" style="text-align: center;">
-  <div>
-      {% for rating in dash_info %}
-      <p><a href={{ "/day_info_link?day={}".format(rating[2]) }}>{{ rating[0] }} : {{ rating[1] }}<a></p>
-      {% endfor %}
-  </div>
-</div>
-<h3 style="text-align: center;">Your Culmulative Stats</h3>
-<div class="well" style="text-align: center;">
   {% for stat_element in dash_stats %}
   <p>{{ stat_element["stat_name"] ~ ': ' ~ stat_element["stat"] }}</p>
   {% endfor %}
 </div>
-
+<style>
+  div.table-well {
+    max-width: 95%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  th.comments {
+    word-wrap: break-word;
+    max-width: 150px;
+  }
+  td.comments {
+    word-wrap: break-word;
+    max-width: 150px;
+  }
+</style>
 <body>
   <div class="ct-chart ct-perfect-fourth"></div>
-
+  <div class="table-well">
+    <table id="index-table" class="display">
+      <thead>
+          <tr>
+              <th>Day</th>
+              <th>Rating</th>
+              <th class="comments">Comments</th>
+          </tr>
+      </thead>
+      <tbody>
+        {% for rating in dash_info %}
+          <tr>
+              <td><a href={{ "/day_info_link?day={}".format(rating[2]) }}>{{ rating[0] }}</a></td>
+              <td><a href={{ "/day_info_link?day={}".format(rating[2]) }}>{{ rating[1] }}</a></td>
+              <td class="comments"><a href={{ "/day_info_link?day={}".format(rating[2]) }}>{{ rating[3] }}</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
   <script>
     var data = $.get('dash_data');
     var extract = data.done(function (response) {

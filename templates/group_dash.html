@@ -2,14 +2,28 @@
 
 {% block content %}
 <h3 style="text-align: center;">{{ group_name }} Dashboard</h3>
-<h3 style="text-align: center;">Individual Stats</h3>
-<div class="well" style="text-align: center;">
-  {% for user_stats in group_user_stats %}
-    <h4 style="text-align: center;">{{ user_stats[0] }}</h3>
-    {% for stat_element in user_stats[1] %}
-      <p>{{ stat_element["stat_name"] ~ ': ' ~ stat_element["stat"] }}</p>
-    {% endfor %}
-  {% endfor %}
+<div class="table-well">
+  <table id="index-table" class="display">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Stat</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+      {% for user in group_stats %}
+        {% for stat_dict in user[1] %}
+            <tr>
+                <td>{{ user[0] }}</td>
+                {% for key in stat_dict.keys() %}
+                <td>{{ stat_dict[key]}}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 <body>
   <div class="ct-chart ct-perfect-fourth"></div>
@@ -17,8 +31,6 @@
   <script>
     var data = $.get('{{ "/group_dash_data?group_name={}".format(group_name_encoded) }}');
     var extract = data.done(function (response) {
-      console.log(response.x)
-      console.log(response.y)
       var obj = new GroupDashChart(response.x, response.y, "Days", "Rating", response.labels);
       obj.createGraph();
     })

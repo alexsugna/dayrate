@@ -20,8 +20,7 @@ def home():
     """
     Routes to and renders the homepage 'index.html'
     """
-    #check_login()      # if the user isn't logged in, they are redirected to the login page. Think about this again later.
-    return render_template('index.html')
+    return render_template('index.html', title="Home", dayrate_description=formats.dayrate_description)
 
 
 @app.route('/login', methods=['POST','GET'])
@@ -77,6 +76,7 @@ def dash():
     username = session['username']                                              # define username variable
     user_preferences = db.get_user_preferences(username)
     dash_info = db.get_dash_info(username)                                      # get user dashboard DayRates
+    print(user_preferences)
     dash_stats = stats.stat_summary(username, user_preferences['num_ratings_stats'], user_preferences['stat_decimals']) # get user dashboard stats
     return render_template('dash.html', title="{}'s Dashboard".format(username),# render user dashboard template
                            dash_info=dash_info, dash_stats=dash_stats)
@@ -220,15 +220,19 @@ def group_dash():
     check_login()
     group_name = request.args.get('group_name')
     username = session['username']
-    group_data = db.get_group_data(username, group_name)#[0]
-    group_users = group_data[0]['users']
-    group_preferences = db.get_group_preferences(group_name, username)
+    group_data = db.get_group_data(username, group_name)[0]
+    group_users = group_data['users']
+    owner = group_data['owner']
+    group_preferences = db.get_group_preferences(group_name, owner)
     group_user_stats = stats.group_user_stats(group_users, group_preferences['group_num_ratings_stats'])
-    summary_stats = stats.group_summary(group_users, group_preferences['group_num_ratings_display'])
+    summary_stats = stats.group_summary(group_users, group_preferences)
+    group_stats = []
+    for stat in group_user_stats:
+        group_stats.append(stat)
     return render_template("group_dash.html", title="{} Dashboard".format(group_name),
                            group_user_stats=group_user_stats, group_name=group_name,
                            group_name_encoded=quote_plus(group_name),
-                           summary_stats=summary_stats)
+                           summary_stats=summary_stats, group_stats=group_stats)
 
 
 @app.route('/group_dash_data', methods=['POST', 'GET'])
@@ -295,16 +299,16 @@ def user_preferences():
     check_login()
     preferences_form = forms.UserPreferencesForm()
     username = session['username']
-    user_preferences = db.get_user_preferences(username)
-    if user_preferences is not None:
-        preferences_form.num_ratings_display.data = int(user_preferences['num_ratings_display'])
-        preferences_form.num_ratings_stats.data = int(user_preferences['num_ratings_stats'])
-        preferences_form.stat_decimals.data = int(user_preferences['stat_decimals'])
+    user_preferences_list = db.get_user_preferences(username)
     if preferences_form.validate_on_submit():
         result, feedback, _ = db.save_user_preferences(preferences_form, username)
         flash(feedback)
         if result:
             return redirect("/dash")
+    if user_preferences is not None:
+        preferences_form.num_ratings_display.data = int(user_preferences_list['num_ratings_display'])
+        preferences_form.num_ratings_stats.data = int(user_preferences_list['num_ratings_stats'])
+        preferences_form.stat_decimals.data = int(user_preferences_list['stat_decimals'])
     return render_template('user_preferences.html', form=preferences_form, username=username)
 
 
@@ -314,17 +318,16 @@ def group_preferences():
     group_name = request.args.get('group_name')
     preferences_form = forms.GroupPreferencesForm()
     username = session['username']
-    group_preferences = db.get_group_preferences(group_name, username)
-    print(group_preferences)
-    if group_preferences is not None:
-        preferences_form.group_num_ratings_display.data = int(user_preferences['group_num_ratings_display'])
-        preferences_form.group_num_ratings_stats.data = int(user_preferences['group_num_ratings_stats'])
-        preferences_form.group_stat_decimals.data = int(user_preferences['group_stat_decimals'])
+    group_preferences_list = db.get_group_preferences(group_name, username)
     if preferences_form.validate_on_submit():
         result, feedback, _ = db.save_group_preferences(preferences_form, username, group_name)
         flash(feedback)
         if result:
             return redirect("/group_dash?group_name={}".format(quote_plus(group_name)))
+    if group_preferences is not None:
+        preferences_form.group_num_ratings_display.data = int(group_preferences_list['group_num_ratings_display'])
+        preferences_form.group_num_ratings_stats.data = int(group_preferences_list['group_num_ratings_stats'])
+        preferences_form.group_stat_decimals.data = int(group_preferences_list['group_stat_decimals'])
     return render_template('group_preferences.html', form=preferences_form, group_name=group_name)
 
 

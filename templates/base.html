@@ -22,12 +22,14 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
+<!-- DataTables -->
+<script src="//cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css"/>
 
 <!-- Define chart classes -->
 <script>
   $(function(ready){
     $("#today").change(function() {
-      console.log("TODAY");
       var day;
       if (this.checked) {
           var now = new Date();
@@ -37,6 +39,10 @@
       }
       $("#day").val(day);
     });
+  });
+
+  $(document).ready( function () {
+    $('#index-table').DataTable();
   });
 
   class BasicChart{
@@ -139,6 +145,55 @@
           }),
           Chartist.plugins.ctThreshold({
             threshold: 5
+          })
+      ]});
+    }
+  }
+  class IndexChart{
+
+    constructor(XData, YData, XLabel, YLabel)
+    {
+      this.XData = XData;
+      this.YData = YData;
+      this.XLabel = XLabel;
+      this.YLabel = YLabel;
+    }
+
+    createGraph()
+    {
+      var data =
+              {
+                labels: this.XData,
+                series:this.YData
+              }
+      new Chartist.Line(
+        '.ct-chart',
+        data,
+         {
+          showArea: false,
+          axisY: {
+            onlyInteger: true
+          },
+          plugins: [
+          Chartist.plugins.ctAxisTitle({
+            axisX: {
+              axisTitle: this.XLabel,
+              axisClass: "ct-axis-title",
+              offset: {
+                x: 0,
+                y: 25
+              },
+              textAnchor: "bottom"
+            },
+            axisY: {
+              axisTitle: this.YLabel,
+              axisClass: "ct-axis-title",
+              offset: {
+                x: 0,
+                y: 25
+              },
+              flipTitle: true
+            }
           })
       ]});
     }
