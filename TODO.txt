@@ -1,6 +1,5 @@
-Customize number of ratings shown on dashboard
 Fix threshold chartist plugin
 Have user confirm invitation to group. Right now we add them automatically
-Create user_preferences and group_preferences documents upon account/group creation, then test user_preferences
-make include in group default
-Group preferences is not auto populating
+Strip whitespace from username/password
+Fix autofill of day_info
+Clean up username check

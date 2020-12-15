@@ -73,10 +73,12 @@ def dash():
     Routes to user dashboard
     """
     check_login()                                                               # verify login
-    username = session['username']                                              # define username variable
+    try:
+        username = session['username']                                              # define username variable
+    except:
+        return redirect('login')
     user_preferences = db.get_user_preferences(username)
     dash_info = db.get_dash_info(username)                                      # get user dashboard DayRates
-    print(user_preferences)
     dash_stats = stats.stat_summary(username, user_preferences['num_ratings_stats'], user_preferences['stat_decimals']) # get user dashboard stats
     return render_template('dash.html', title="{}'s Dashboard".format(username),# render user dashboard template
                            dash_info=dash_info, dash_stats=dash_stats)
@@ -89,7 +91,11 @@ def dash_data():
     optimized at a later date.)
     """
     check_login()
-    dash_info = db.get_dash_info(session['username'])                           # get ratings
+    try:
+        username = session['username']                                              # define username variable
+    except:
+        return redirect('login')
+    dash_info = db.get_dash_info(username)                           # get ratings
     days = []                                                                   # x coords
     ratings = []                                                                # y coords
     for rating in dash_info:                                                    # iterate through ratings
@@ -114,7 +120,11 @@ def day_info_link():
     """
     check_login()
     day = request.args.get('day')                                               # get url argument specifying day
-    day_information = day_info(day, session['username'])                        # get the rating for that day (if it exists) using the database module
+    try:
+        username = session['username']                                              # define username variable
+    except:
+        return redirect('login')
+    day_information = day_info(day, username)                        # get the rating for that day (if it exists) using the database module
     try:                                                                        # try to delete the document id
         del day_information['_id']
     except KeyError:                                                            # if it throws a KeyError, then the document doesn't exist
@@ -132,13 +142,17 @@ def day_info_get():
     day_info = session['day_information']                                       # get day_information from session variable
     day_rate_form = forms.DayRateForm()                                         # the DayRate form
     if flask.request.method == 'GET':                                           # if the request is a GET, this means we are requesting the form to fill out
-        day_rate_form.comments.data = day_info['comments']                      # set form comment data as session variable
+        #day_rate_form.comments.data = day_info['comments']                      # set form comment data as session variable
         return render_template("day_info.html", title="Day Details",            # render DayRate template
                                 day_information=day_info, form=day_rate_form)
     else:                                                                       # else the request is probably a POST (not a GET)
         session.pop('day_information', None)                                    # remove the rating info from the session variable
         if day_rate_form.validate_on_submit():                                  # if the form is valid
-            day_info = formats.fill_day_info(day_rate_form, day_info["day"], session['username'])   # with the rating session info, populate a DayRate formatted object
+            try:
+                username = session['username']                                              # define username variable
+            except:
+                return redirect('login')
+            day_info = formats.fill_day_info(day_rate_form, day_info["day"], username)   # with the rating session info, populate a DayRate formatted object
             result, feedback, id = db.save_dayrate(day_info, session['username'])   # save the dayrate object in the database
             flash(feedback)
             return redirect("/dash")                                            # redirect to the user dashboard
@@ -155,7 +169,11 @@ def pick_day():
     form = forms.PickDayForm()                                                  # choose a day form
     if form.validate_on_submit():
         day = str(form.day.data)                                            # else get the date the user input
-        day_information = day_info(day, session['username'])                    # get the DayRate document from the database if it exists
+        try:
+            username = session['username']                                              # define username variable
+        except:
+            return redirect('login')
+        day_information = day_info(day, username)                    # get the DayRate document from the database if it exists
         if day_information is None:                                             # if it doesn't exist
             day_information = formats.day_information                           # create an empty object
             day_information['day'] = day
@@ -174,7 +192,10 @@ def groups():
     Redirects to and renders the groups page.
     """
     check_login()
-    username = session['username']
+    try:
+        username = session['username']                                              # define username variable
+    except:
+        return redirect('login')
     my_groups = db.get_my_groups(username)                                      # get user's groups
     groups = []
     for group in my_groups:                                                     # iterate over groups
@@ -191,9 +212,14 @@ def create_group():
     check_login()
     form = forms.CreateGroup()
     if form.validate_on_submit():
-        result, feedback, id = db.create_group(form.name.data, session['username'], form.include_user.data)
+        try:
+            username = session['username']                                              # define username variable
+        except:
+            return redirect('login')
+        result, feedback, id = db.create_group(form.name.data, username, form.include_user.data)
         flash(feedback)
         return redirect("/groups")
+    form.include_user.data = True
     return render_template('create_group.html', title="Create Group", form=form)
 
 
@@ -201,14 +227,18 @@ def create_group():
 def display_group(): # this process needs validation/feedback
     check_login()
     group_name = request.args.get('group_name')
-    group_data = db.get_group_data(session['username'], group_name)
+    try:
+        username = session['username']                                              # define username variable
+    except:
+        return redirect('login')
+    group_data = db.get_group_data(username, group_name)
     if len(group_data) < 1:
         return redirect('/groups')
     group_data = group_data[0]
     group_users = group_data['users']
     owner = False
     owner_username = group_data['owner']
-    if owner_username == session['username']:
+    if owner_username == username:
         owner = True
     encoded = (quote_plus(group_name), quote_plus(owner_username))
     return render_template("group_display.html", title=group_name, group_users=group_users,
@@ -219,7 +249,10 @@ def display_group(): # this process needs validation/feedback
 def group_dash():
     check_login()
     group_name = request.args.get('group_name')
-    username = session['username']
+    try:
+        username = session['username']                                              # define username variable
+    except:
+        return redirect('login')
     group_data = db.get_group_data(username, group_name)[0]
     group_users = group_data['users']
     owner = group_data['owner']
@@ -239,8 +272,14 @@ def group_dash():
 def group_dash_data():
     check_login()
     group_name = request.args.get('group_name')
-    days, ratings, labels = db.get_group_dash_data(session['username'], group_name)
-    data = { "x" : days, "y" : ratings, "labels" : labels}
+    try:
+        username = session['username']                                              # define username variable
+    except:
+        return redirect('login')
+    days, ratings, labels = db.get_group_dash_data(username, group_name)
+    ratings_w_descriptions = add_descriptions(ratings, labels)
+    print(ratings_w_descriptions)
+    data = { "x" : days, "y" : ratings_w_descriptions, "labels" : labels}
     return data
 
 
@@ -252,7 +291,11 @@ def add_user_to_group():
     if form.validate_on_submit():
         username_to_add = form.username.data
         if len(db.find_user(username_to_add)) >= 1:
-            insert_result, feedback, _ = db.insert_user_to_group(username_to_add, group_name, session['username'])
+            try:
+                username = session['username']                                              # define username variable
+            except:
+                return redirect('login')
+            insert_result, feedback, _ = db.insert_user_to_group(username_to_add, group_name, username)
             flash(feedback)
             if insert_result:
                 return redirect("/display_group?group_name={}".format(quote_plus(group_name)))
@@ -265,7 +308,11 @@ def add_user_to_group():
 def change_group_owner():
     check_login()
     group_name = request.args.get('group_name')
-    user_list = db.get_group_data(session['username'], group_name)[0]['users']
+    try:
+        username = session['username']                                              # define username variable
+    except:
+        return redirect('login')
+    user_list = db.get_group_data(username, group_name)[0]['users']
     form = forms.ChangeGroupOwnerForm()
     form.new_owner.choices = user_list
     if form.validate_on_submit():
@@ -285,7 +332,10 @@ def delete_group():
     group_name = request.args.get('group_name')
     delete_form = forms.DeleteGroupForm()
     if delete_form.validate_on_submit():
-        username = session['username']
+        try:
+            username = session['username']                                              # define username variable
+        except:
+            return redirect('login')
         if username == db.get_group_data(username, group_name)[0]['owner']:
             delete_result, feedback, _ = db.delete_group(username, group_name)
             flash(feedback)
@@ -298,7 +348,10 @@ def delete_group():
 def user_preferences():
     check_login()
     preferences_form = forms.UserPreferencesForm()
-    username = session['username']
+    try:
+        username = session['username']                                              # define username variable
+    except:
+        return redirect('login')
     user_preferences_list = db.get_user_preferences(username)
     if preferences_form.validate_on_submit():
         result, feedback, _ = db.save_user_preferences(preferences_form, username)
@@ -317,7 +370,10 @@ def group_preferences():
     check_login()
     group_name = request.args.get('group_name')
     preferences_form = forms.GroupPreferencesForm()
-    username = session['username']
+    try:
+        username = session['username']                                              # define username variable
+    except:
+        return redirect('login')
     group_preferences_list = db.get_group_preferences(group_name, username)
     if preferences_form.validate_on_submit():
         result, feedback, _ = db.save_group_preferences(preferences_form, username, group_name)
@@ -336,6 +392,15 @@ def check_login():
         return
     else:
         return redirect("/login")
+
+def add_descriptions(ratings, labels):
+    ratings_w_descriptions = []
+    for i, rating_series in enumerate(ratings):
+        ratings_w_description = []
+        for rating in rating_series:
+            ratings_w_description.append({"meta" : labels[i], "value" : rating})
+        ratings_w_descriptions.append(ratings_w_description)
+    return ratings_w_descriptions
 
 if __name__ == '__main__':
     app.run(debug=True)

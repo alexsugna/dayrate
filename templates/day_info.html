@@ -8,14 +8,14 @@
         {{ form.hidden_tag() }}
         <p>
             {{ form.rating.label }}<br>
-            {{ form.rating(size=32, value=day_information['rating']) }}
+            {{ form.rating(size=32, value='') }}
             {% for error in form.rating.errors %}
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
         <p>
             {{ form.comments.label }}<br>
-            {{ form.comments(size=32, value=day_information['comments']) }}
+            {{ form.comments(size=32, value='') }}
             {% for error in form.comments.errors %}
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}

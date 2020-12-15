@@ -25,8 +25,8 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Sign In')
 
 class CreateAccountForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    username = StringField('Username', validators=[DataRequired(), validators.Regexp(r'^[\w.@+-]+$')])
+    password = PasswordField('Password', validators=[DataRequired(), validators.Regexp(r'^[\w.@+-]+$')])
     reenter_password = PasswordField('Re-Enter Password', validators=[DataRequired()])
     submit = SubmitField('Create Account')
 

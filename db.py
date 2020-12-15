@@ -400,6 +400,7 @@ def get_group_dash_data(username, group_name):
         ratings.append(ratings_by_day)
     return days, ratings, list(user_datas.keys())
 
+
 def get_user_preferences(username):
     client = get_client()
     user_preferences_collection = client["user_preferences"]

@@ -13,7 +13,7 @@
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
-        <p>{{ form.include_user() }} {{ form.include_user.label }}</p>
+        <p>{{ form.include_user(checked=True) }} {{ form.include_user.label }}</p>
         <p>{{ form.submit() }}</p>
     </form>
   </div>

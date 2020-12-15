@@ -1,13 +1,5 @@
 
 <html>
-<!-- Charlist-->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
-<script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
-
-<!-- Chartist plugins -->
-<script src="{{url_for('static', filename='chartist_plugins/chartist-plugin-axistitle-master/dist/chartist-plugin-axistitle.min.js')}}"></script>
-<script src="{{url_for('static', filename='chartist_plugins/chartist-plugin-threshold-master/dist/chartist-plugin-threshold.min.js')}}"></script>
-<!-- <script src="{{url_for('static', filename='chartist_plugins/chartist-plugin-legend-master/chartist-plugin-legend.js')}}"></script> -->
 
 <!-- Bootstraps Java Scipts Links -->
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
@@ -25,6 +17,16 @@
 <!-- DataTables -->
 <script src="//cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
 <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css"/>
+
+<!-- Charlist-->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+<script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+
+<!-- Chartist plugins -->
+<script src="{{url_for('static', filename='chartist_plugins/chartist-plugin-axistitle-master/dist/chartist-plugin-axistitle.min.js')}}"></script>
+<!-- <script src="{{url_for('static', filename='chartist_plugins/chartist-plugin-threshold-master/dist/chartist-plugin-threshold.min.js')}}"></script>
+<script src="{{url_for('static', filename='chartist_plugins/chartist-plugin-legend-master/chartist-plugin-legend.js')}}"></script> -->
+<script src="{{url_for('static', filename='chartist_plugins/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.min.js')}}"></script>
 
 <!-- Define chart classes -->
 <script>
@@ -98,13 +100,12 @@
 
   class GroupDashChart{
 
-    constructor(XData, YData, XLabel, YLabel, labels)
+    constructor(XData, YData, XLabel, YLabel)
     {
       this.XData = XData;
       this.YData = YData;
       this.XLabel = XLabel;
       this.YLabel = YLabel;
-      this.labels = labels;
     }
 
     createGraph()
@@ -143,9 +144,7 @@
               flipTitle: true
             }
           }),
-          Chartist.plugins.ctThreshold({
-            threshold: 5
-          })
+          Chartist.plugins.tooltip()
       ]});
     }
   }
@@ -223,18 +222,18 @@
       {% endif %}
     </head>
     <body>
-      <ul class="menu-bar">
-        <li><a href="/" title="Home"><img src="{{url_for('static', filename='logo.png')}}" height="23"></a></li>
+      <div class="topnav">
+        <a href="/" title="Home"><img src="{{url_for('static', filename='logo.png')}}" height="23"></a>
         {% if 'username' in session %}
-        <li><a href="/dash" title="Dashboard">My Dashboard</a></li>
-        <li><a href="/groups" title="Groups">Groups</a></li>
-        <li><a href="/user_preferences" title="Preferences">Preferences</a></li>
-        <li><a href="/logout" title="Log Out">Log Out</a></li>
+        <a href="/dash" title="Dashboard">My Dashboard</a>
+        <a href="/groups" title="Groups">Groups</a>
+        <a href="/user_preferences" title="Preferences">Preferences</a>
+        <a href="/logout" title="Log Out">Log Out</a>
         {% else %}
-        <li><a href="/login" title="Log In">Login</a></li>
-        <li><a href="/create_account" title="Create Account">Create Account</a></li>
+        <a href="/login" title="Log In">Login</a>
+        <a href="/create_account" title="Create Account">Create Account</a>
         {% endif %}
-      </ul>
+      </div>
       <hr>
       {% with messages = get_flashed_messages() %}
           {% if messages %}
