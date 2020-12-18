@@ -1,5 +1,36 @@
 Fix threshold chartist plugin
 Have user confirm invitation to group. Right now we add them automatically
-Strip whitespace from username/password
 Fix autofill of day_info
 Clean up username check
+
+Notifications:
+
+  Forget to rate days: -> takes you through process of rating days you missed?
+
+  Added to Group Notification: -> show popup/notification bubble when someone
+                                  added you to a group.
+
+  Search usernames to add to group
+
+  Search groups to request membership
+
+
+
+
+
+
+  SEARCH GROUPS:
+    CREATE GROUP JOIN REQUEST COLLECTION IN DB
+    search form:
+      -> as user types, matching groups appear in dropdown with "join group" button
+      -> when user selects "join group" submit form, flash "you have requested to join group ___"
+         or error.
+
+  DISPLAY JOIN REQUESTS:
+
+    create notification for group owner. When pushed, takes them to a form that says:
+      -> "Add <username> to <group name>?". On submit: Yes, no. Add or don't, flash feedback.
+
+
+  Additional parameters beyond day rating (hydration, social contact, work done, food quality, etc.)
+  Be able to customize these parameters

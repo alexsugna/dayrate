@@ -387,6 +387,44 @@ def group_preferences():
     return render_template('group_preferences.html', form=preferences_form, group_name=group_name)
 
 
+@app.route('/join_group', methods=['POST', 'GET'])
+def join_group():
+    """
+    For handling user requesting to join a group
+    """
+    check_login()
+    username = session['username']
+    join_group_form = forms.JoinGroup()
+    if join_group_form.validate_on_submit():
+        group_name = join_group_form.group_name.data
+        success, feedback, _ = db.create_join_group_request(username, group_name)
+        flash(feedback)
+        if success:
+            return redirect('/groups')
+    return render_template('join_group.html', form=join_group_form)
+
+
+@app.route('/respond_to_join_group_request', methods=['POST', 'GET'])
+def respond_to_join_group_request():
+    """
+    respond to a join group request
+    """
+    check_login()
+    username_to_add = request.args.get('username_to_add')
+    group_name = request.args.get('group_name')
+    join_group_response_form = forms.JoinGroupResponse()
+    username = session['username']
+    if join_group_response_form.validate_on_submit():
+        accept = str(join_group_response_form.accept.data)
+        delete = str(join_group_response_form.delete.data)
+        if accept != delete:
+            if accept == "True":
+                success, feedback, _ = db.accept_join_group_request(username_to_add, group_name)
+        else:
+            flash("You cannot accept and delete the request. Please pick one.")
+    return render_template('respond_to_join_group_request.html', form=join_group_response_form)
+
+
 def check_login():
     if 'username' in session:
         return

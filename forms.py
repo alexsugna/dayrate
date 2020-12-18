@@ -67,3 +67,12 @@ class GroupPreferencesForm(FlaskForm):
     group_num_ratings_stats = IntegerField('Max ratings used to calculate group stats (integer)', validators=[DataRequired()])
     group_stat_decimals = IntegerField('Decimal precision of group stats (integer)', validators=[DataRequired()])
     submit = SubmitField('Save Group Preferences')
+
+class JoinGroup(FlaskForm):
+    group_name = StringField('Group Name', validators=[DataRequired()])
+    submit = SubmitField('Join Group')
+
+class JoinGroupResponse(FlaskForm):
+    accept = BooleanField('Accept Request')
+    delete = BooleanField('Delete Request')
+    submit = SubmitField('Save Response')

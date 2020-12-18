@@ -446,3 +446,38 @@ def save_group_preferences(preferences_form, username, group_name):
         return True, "Group preferences updated successfully!", None
     else:
         return bad_result
+
+
+def create_join_group_request(username, group_name):
+    client = get_client()
+    group_join_requests_collection = client['group_join_requests']
+    # check if request already exists
+    query = {"username" : username, "group_name" : group_name}
+    check_duplicate_request = unwrap_query_results(group_join_requests_collection.find(query))
+    if len(check_duplicate_request) > 0:
+        return False, "You have already requested to join {}. Please wait for group owner to accept your request.".format(group_name), None
+    result = group_join_requests_collection.insert_one(query)
+    if result.acknowledged:
+        return True, "Successfully requested to join {}. Group owner must now let you in.".format(group_name), None
+    return False, "Request to join {} was unsuccessful. Please try again".format(group_name), None
+
+
+def accept_join_group_request(username_to_add, group_name, username):
+    # add user to group
+    success, feedback, _ = insert_user_to_group(username_to_add, group_name, username)
+    if success:
+        #delete request
+        delete_success, delete_feedback, _ = delete_join_group_request(username_to_add, group_name, username)
+        if delete_success:
+            return True, feedback, None
+        return bad_result
+    return success, feedback, Nones
+
+def delete_join_group_request(username_to_add, group_name, username):
+    client = get_client()
+    group_join_requests_collection = client['group_join_requests']
+    delete_result = group_join_requests_collection.delete_one({"username" : username_to_add,
+                                                               "group_name" : group_name})
+    if delete_result.acknowledged:
+        return True, "Join group request successfully deleted.", None
+    return False, "Join group request not successfully deleted.", None
