@@ -179,7 +179,7 @@ def get_past_n_days(username, n):
     client = get_client()
     days_collection = client["days"]
     query = {"username" : username}
-    results = days_collection.find(query).sort([('timestamp', 1)]).limit(n)
+    results = days_collection.find(query, sort=[( '_id', pymongo.DESCENDING )]).limit(n)
     return unwrap_query_results(results)
 
 
