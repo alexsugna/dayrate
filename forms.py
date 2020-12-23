@@ -69,8 +69,10 @@ class GroupPreferencesForm(FlaskForm):
     submit = SubmitField('Save Group Preferences')
 
 class JoinGroup(FlaskForm):
-    group_name = StringField('Group Name', validators=[DataRequired()])
-    submit = SubmitField('Join Group')
+    group_name_search = StringField('Search Group Name', validators=[])
+    group_name_select = SelectField('Group Names', choices=None, validators=[DataRequired()])
+    submit = SubmitField('Search')
+    select_group = SubmitField('Send Join Request')
 
 class JoinGroupResponse(FlaskForm):
     accept = BooleanField('Accept Request')

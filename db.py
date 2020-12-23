@@ -481,3 +481,12 @@ def delete_join_group_request(username_to_add, group_name, username):
     if delete_result.acknowledged:
         return True, "Join group request successfully deleted.", None
     return False, "Join group request not successfully deleted.", None
+
+def get_group_names(user_text):
+    client = get_client()
+    groups_collection = client['groups']
+    groups_collection.create_index([('name', pymongo.TEXT)], name='search_index')
+    query = { "$text" : { "$search" : user_text } }
+    result = groups_collection.find(query)
+    #print("RESULT: ", list(result))
+    return unwrap_query_results(result)

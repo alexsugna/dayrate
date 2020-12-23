@@ -387,21 +387,32 @@ def group_preferences():
     return render_template('group_preferences.html', form=preferences_form, group_name=group_name)
 
 
-@app.route('/join_group', methods=['POST', 'GET'])
-def join_group():
+@app.route('/join_group', methods=['GET', 'POST'])
+def join_group_get():
     """
     For handling user requesting to join a group
+
+    if url arg is null, searching, else, selecting
     """
     check_login()
     username = session['username']
+    user_text = request.args.get('user_text')
     join_group_form = forms.JoinGroup()
-    if join_group_form.validate_on_submit():
-        group_name = join_group_form.group_name.data
+    group_name = join_group_form.group_name_select.data
+    if (user_text is None) and (group_name is None):
+        """
+        search phase
+        """
+        pass
+    elif group_name is not None:
+        """
+        submit phase
+        """
         success, feedback, _ = db.create_join_group_request(username, group_name)
         flash(feedback)
         if success:
             return redirect('/groups')
-    return render_template('join_group.html', form=join_group_form)
+    return render_template('join_group.html', form=join_group_form, search=search)
 
 
 @app.route('/respond_to_join_group_request', methods=['POST', 'GET'])
@@ -423,6 +434,18 @@ def respond_to_join_group_request():
         else:
             flash("You cannot accept and delete the request. Please pick one.")
     return render_template('respond_to_join_group_request.html', form=join_group_response_form)
+
+@app.route('/get_group_names', methods=['POST', 'GET'])
+def get_group_names():
+    print("GETTING GROUP NAMES")
+    user_text = request.args.get('user_text')
+    print("user_text: ", user_text)
+    if user_text is None:
+        user_text = ""
+    group_names = db.get_group_names(user_text)
+    print("GROUP NAMES: ", group_names)
+    data = {"group_names" : group_names}
+    return data
 
 
 def check_login():

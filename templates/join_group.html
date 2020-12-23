@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 style="text-align: center;">Join Group</h1>
+{% if search %}
+<body style="text-align: center;">
+  <div class="well">
+    <form id="group_name_form" action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p id="group_name">
+            {{ form.group_name.label }}<br>
+            {{ form.group_name() }}
+            {% for error in form.group_name.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+  </div>
+</body>
+{% endif %}
+
+{% endblock %}
