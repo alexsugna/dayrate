@@ -447,6 +447,13 @@ def get_group_names():
     return data
 
 
+@app.route('/notifications', methods=['POST', 'GET'])
+def notifications():
+    return render_template('notifications.html')
+
+
+
+
 def check_login():
     if 'username' in session:
         return
