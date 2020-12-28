@@ -5,18 +5,56 @@
 {% if search %}
 <body style="text-align: center;">
   <div class="well">
-    <form id="group_name_form" action="" method="post" novalidate>
+    <form id="group_name_form" action="" method="post" onsubmit="return makeSearch()" novalidate>
         {{ form.hidden_tag() }}
-        <p id="group_name">
-            {{ form.group_name.label }}<br>
-            {{ form.group_name() }}
-            {% for error in form.group_name.errors %}
+        <p id="group_name_search">
+            {{ form.group_name_search.label }}<br>
+            {{ form.group_name_search() }}
+            {% for error in form.group_name_search.errors %}
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
         <p>{{ form.submit() }}</p>
     </form>
+    <form id="group_select" action='/join_group' method="post" hidden>
+      {{ form.hidden_tag() }}
+      <p id="group_name_select">
+          {{ form.group_name_select.label }}<br>
+          {{ form.group_name_select() }}
+          {% for error in form.group_name_select.errors %}
+          <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+      </p>
+      <p>
+        <div class="panel-body">
+          <input type ="submit" name="action" value="Request to Join">
+        </div>
+      </p>
+    </form>
   </div>
+  <script>
+    function makeSearch() {
+      var user_text = document.getElementsByName("group_name_search")[0].value;
+      var data = $.get('/get_group_names?user_text=' + encodeURI(user_text));
+      var extract = data.done(function (response) {
+        console.log(response.group_names);
+        var group_names = response.group_names;
+        if (group_names === undefined || group_names.length == 0) {
+          alert("Search does not match any existing groups.")
+          return false;
+        }
+        document.getElementById("group_select").hidden = false;
+        var select_group = document.getElementsByName("group_name_select")[0];
+        console.log(select_group);
+        for(var i = 0; i < group_names.length; i++){
+          var option = document.createElement("option");
+          option.text = group_names[i];
+          select_group.add(option);
+        }
+      })
+      return false;
+    }
+  </script>
 </body>
 {% endif %}
 

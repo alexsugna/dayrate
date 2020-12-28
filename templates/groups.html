@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
+<style>
+  div {
+    text-align: center;
+  }
+</style>
 <h2 style="text-align: center;">Your Groups</h2>
 <div>
   <div style="text-align: center;">
@@ -8,8 +13,11 @@
       <p><strong><a href={{ "/display_group?group_name={}".format(group[0]) }}>{{ group[1] }}</a></strong></p>
       {% endfor %}
   </div>
-  <div style="text-align: center;">
+  <div>
       <a href="/create_group">Create a Group</a>
+  </div>
+  <div>
+    <a href="/join_group">Find a Group</a>
   </div>
 </div>
 {% endblock %}

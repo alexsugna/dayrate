@@ -450,12 +450,16 @@ def save_group_preferences(preferences_form, username, group_name):
 
 def create_join_group_request(username, group_name):
     client = get_client()
+    user_groups = get_my_groups(username)
+    for group in user_groups:
+        if group['name'] == group_name:
+            return True, "You are already a member of {}".format(group_name), None
     group_join_requests_collection = client['group_join_requests']
     # check if request already exists
     query = {"username" : username, "group_name" : group_name}
     check_duplicate_request = unwrap_query_results(group_join_requests_collection.find(query))
     if len(check_duplicate_request) > 0:
-        return False, "You have already requested to join {}. Please wait for group owner to accept your request.".format(group_name), None
+        return True, "You have already requested to join {}. Please wait for group owner to accept your request.".format(group_name), None
     result = group_join_requests_collection.insert_one(query)
     if result.acknowledged:
         return True, "Successfully requested to join {}. Group owner must now let you in.".format(group_name), None
@@ -488,5 +492,8 @@ def get_group_names(user_text):
     groups_collection.create_index([('name', pymongo.TEXT)], name='search_index')
     query = { "$text" : { "$search" : user_text } }
     result = groups_collection.find(query)
-    #print("RESULT: ", list(result))
-    return unwrap_query_results(result)
+    groups = unwrap_query_results(result)
+    group_names = []
+    for group in groups:
+        group_names.append(group['name'])
+    return group_names

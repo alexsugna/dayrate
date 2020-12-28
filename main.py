@@ -399,15 +399,16 @@ def join_group_get():
     user_text = request.args.get('user_text')
     join_group_form = forms.JoinGroup()
     group_name = join_group_form.group_name_select.data
-    if (user_text is None) and (group_name is None):
+    if group_name is None:
         """
         search phase
         """
-        pass
+        search = True
     elif group_name is not None:
         """
         submit phase
         """
+        search = False
         success, feedback, _ = db.create_join_group_request(username, group_name)
         flash(feedback)
         if success:
@@ -435,15 +436,13 @@ def respond_to_join_group_request():
             flash("You cannot accept and delete the request. Please pick one.")
     return render_template('respond_to_join_group_request.html', form=join_group_response_form)
 
+
 @app.route('/get_group_names', methods=['POST', 'GET'])
 def get_group_names():
-    print("GETTING GROUP NAMES")
     user_text = request.args.get('user_text')
-    print("user_text: ", user_text)
     if user_text is None:
         user_text = ""
     group_names = db.get_group_names(user_text)
-    print("GROUP NAMES: ", group_names)
     data = {"group_names" : group_names}
     return data
 
@@ -453,6 +452,7 @@ def check_login():
         return
     else:
         return redirect("/login")
+
 
 def add_descriptions(ratings, labels):
     ratings_w_descriptions = []
