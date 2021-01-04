@@ -255,10 +255,11 @@ def group_dash():
         return redirect('login')
     group_data = db.get_group_data(username, group_name)[0]
     group_users = group_data['users']
+    start_date = group_data['create_date']
     owner = group_data['owner']
     group_preferences = db.get_group_preferences(group_name, owner)
-    group_user_stats = stats.group_user_stats(group_users, group_preferences['group_num_ratings_stats'])
-    summary_stats = stats.group_summary(group_users, group_preferences)
+    group_user_stats = stats.group_user_stats(group_users, group_preferences['group_num_ratings_stats'], start_date=start_date)
+    summary_stats = stats.group_summary(group_users, group_preferences, start_date=start_date)
     group_stats = []
     for stat in group_user_stats:
         group_stats.append(stat)

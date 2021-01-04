@@ -140,7 +140,7 @@ def save_dayrate(day_information, username):
             return bad_result
 
 
-def get_dash_info(username):
+def get_dash_info(username, start_date=None):
     """
     Retrieves the user's dashboard information
 
@@ -157,7 +157,7 @@ def get_dash_info(username):
         n = dp.num_ratings_display
     else:
         n = user_preferences['num_ratings_display']
-    past_n_days = get_past_n_days(username, int(n))
+    past_n_days = get_past_n_days(username, int(n), start_date=start_date)
     ratings = []
     for rating in past_n_days:
         ratings.append((rating['day'], rating['rating'], quote_plus(rating['day']),
@@ -165,7 +165,7 @@ def get_dash_info(username):
     return ratings
 
 
-def get_past_n_days(username, n):
+def get_past_n_days(username, n, start_date=None):
     """
     Returns the past n DayRates
 
@@ -179,8 +179,17 @@ def get_past_n_days(username, n):
     client = get_client()
     days_collection = client["days"]
     query = {"username" : username}
-    results = days_collection.find(query, sort=[( '_id', pymongo.DESCENDING )]).limit(n)
-    return unwrap_query_results(results)
+    results = unwrap_query_results(days_collection.find(query, sort=[( '_id', pymongo.DESCENDING )]).limit(n))
+    if start_date is not None:
+        start_obj = datetime.datetime.strptime(start_date, '%Y-%m-%d') - datetime.timedelta(days=1)
+        filtered_results = []
+        for result in results:
+            rating_date = datetime.datetime.strptime(result['day'], '%Y-%m-%d')
+            if rating_date >= start_obj:
+                filtered_results.append(result)
+        results = filtered_results
+
+    return results
 
 
 def get_my_groups(username):
@@ -371,11 +380,13 @@ def get_group_dash_data(username, group_name):
     returns:
         tuple (list of sorted day strings, list of string ratings, list of string users in group)
     """
-    group_users = get_group_data(username, group_name)[0]['users']
+    group_data = get_group_data(username, group_name)[0]
+    group_users = group_data['users']
+    create_date = group_data['create_date']
     data = {}
     user_datas = {}
     for username in group_users:
-        user_data = get_dash_info(username)
+        user_data = get_dash_info(username, start_date=create_date)
         user_datas.update({username : user_data})
         for day_tuple in user_data:
             day = day_tuple[0]
