@@ -392,20 +392,24 @@ def group_preferences():
 
 @app.route('/set_cookie', methods=['POST', 'GET'])
 def set_cookie():
+    """
+    Sets cookie in browser
+    """
     name = request.args.get('name')
     value = request.args.get('value')
     if (name is None) or (value is None):
         return None
     response = make_response("Setting a cookie")
     response.set_cookie(name, value, max_age=60*60*24*365*2)
-    print("set_cookie_color: ", value)
     return response
 
 
 @app.route('/get_cookie_color', methods=['POST', 'GET'])
 def get_cookie_color():
+    """
+    Returns color cookie
+    """
     color = request.cookies.get('color')
-    print("get_cookie_color: ", color)
     return {"color" : color}
 
 

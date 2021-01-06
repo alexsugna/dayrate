@@ -50,21 +50,8 @@
     </table>
   </div>
   <script>
-
-    var data = $.get('dash_data');
-    var extract = data.done(function (response) {
-      var obj = new BasicChart(response.x, response.y, "Days", "Rating");
-      obj.createGraph();
-    })
-    function checkContainer () {
-      if($('.ct-series-a').is(':visible')){ //if the container is visible on the page
-        setColor();
-      } else {
-        setTimeout(checkContainer, 50); //wait 50 ms, then try again
-        console.log("wait!");
-      }
-    }
-    checkContainer();
+    renderGraph();
+    cookieColor();
   </script>
 </body>
 {% endblock %}

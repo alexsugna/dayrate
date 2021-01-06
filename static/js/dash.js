@@ -1,7 +1,6 @@
 // Javascript functions for dash.html
 
 function Color(color, set){
-  console.log("Color: " +color);
   var ct_series = document.getElementsByClassName('ct-series-a')[0];
   var line = ct_series.getElementsByClassName('ct-line')[0];
   var points = ct_series.getElementsByClassName('ct-point');
@@ -13,10 +12,10 @@ function Color(color, set){
 
   line.style.stroke = color;
   area.style.fill = color;
-  console.log("colors should be changed!")
   if(set){
     var cookie_response = $.get('set_cookie?name=color&value=' + color);
   }
+  $('#colors').val(color);
 }
 
 function changeColors() {
@@ -29,9 +28,8 @@ function setColor(){
   var color;
   var extract = data.done(function (response) {
     color = response.color;
-    console.log("setColor color: " + color);
+    Color(color, false);
   })
-  Color(color, false);
 }
 
 function displayArea() {
@@ -43,4 +41,20 @@ function displayArea() {
   else{
     area.style.display = "none";
   }
+}
+
+function cookieColor() {
+  if($('.ct-series-a').is(':visible')){ //if the graph is rendered
+    setColor();
+  } else {
+    setTimeout(cookieColor, 50);
+  }
+}
+
+function renderGraph(){
+  var data = $.get('dash_data');
+  var extract = data.done(function (response) {
+    var obj = new BasicChart(response.x, response.y, "Days", "Rating");
+    obj.createGraph();
+  })
 }
