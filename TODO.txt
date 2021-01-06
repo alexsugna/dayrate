@@ -3,3 +3,5 @@ Have user confirm invitation to group. Right now we add them automatically
 Strip whitespace from username/password
 Fix autofill of day_info
 Clean up username check
+
+Limit number of people allowed in group

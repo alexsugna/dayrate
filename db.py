@@ -369,7 +369,7 @@ def delete_group(owner_name, group_name):
     return bad_result
 
 
-def get_group_dash_data(username, group_name):
+def get_group_dash_data(username, group_name, only_group_users=False):
     """
     Get the information for a group's dashboard. (This can totally be optimized at some later point)
 
@@ -382,6 +382,8 @@ def get_group_dash_data(username, group_name):
     """
     group_data = get_group_data(username, group_name)[0]
     group_users = group_data['users']
+    if only_group_users:
+        return group_users
     create_date = group_data['create_date']
     data = {}
     user_datas = {}

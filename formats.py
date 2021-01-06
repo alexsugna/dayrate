@@ -26,9 +26,20 @@ color_options = "<option value='red' id='red'>Red</option> \
                 <option value='white' id='white'>White</option> \
                 <option value='gray' id='gray'>Gray</option>"
 
+
 def fill_day_info(form, day, username):
     day_information['day'] = day
     day_information['username'] = username
     day_information['rating'] = form.rating.data
     day_information['comments'] = form.comments.data
     return day_information
+
+
+def get_group_color_options(group_members):
+    html = ""
+    for member in group_members:
+        html += "<div><label for='color-select-{}'>{}'s color  </label>".format(member, member)
+        html += "<select name='color-select-{}' id='color-select-{}' onchange='changeColors({})'>".format(member, member, member)
+        html += color_options
+        html += "</select></div>"
+    return html

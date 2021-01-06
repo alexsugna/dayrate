@@ -3,6 +3,7 @@
 {% block content %}
 
 <script src="{{url_for('static', filename='js/group_dash.js')}}"></script>
+
 <style>
   .flex-container{
     text-align: center;
@@ -37,6 +38,10 @@
 
   <div class="ct-chart ct-perfect-fourth"></div>
   <section id="chart-preferences" class="flex-container">
+    <div id="chart-color-preferences" class="flex-child">
+      <h4>Line Colors</h4>
+      {{ color_options|safe }}
+    </div>
     <div id="display-area" class="flex-child-first">
       <h4>Display Areas</h4>
       <input type="checkbox" id="display-area-check" name="display-area" checked onchange="displayAreas()">
@@ -50,6 +55,7 @@
       var obj = new GroupDashChart(response.x, response.y, "Days", "Rating");
       obj.createGraph();
     })
+    console.log(group_users);
   </script>
 </body>
 

@@ -257,6 +257,7 @@ def group_dash():
         return redirect('login')
     group_data = db.get_group_data(username, group_name)[0]
     group_users = group_data['users']
+    color_options = formats.get_group_color_options(group_users)
     start_date = group_data['create_date']
     owner = group_data['owner']
     group_preferences = db.get_group_preferences(group_name, owner)
@@ -268,7 +269,8 @@ def group_dash():
     return render_template("group_dash.html", title="{} Dashboard".format(group_name),
                            group_user_stats=group_user_stats, group_name=group_name,
                            group_name_encoded=quote_plus(group_name),
-                           summary_stats=summary_stats, group_stats=group_stats)
+                           summary_stats=summary_stats, group_stats=group_stats,
+                           color_options=color_options, group_users=group_users)
 
 
 @app.route('/group_dash_data', methods=['POST', 'GET'])
@@ -276,14 +278,26 @@ def group_dash_data():
     check_login()
     group_name = request.args.get('group_name')
     try:
-        username = session['username']                                              # define username variable
+        username = session['username']                                          # define username variable
     except:
         return redirect('login')
     days, ratings, labels = db.get_group_dash_data(username, group_name)
-    ratings_w_descriptions = add_descriptions(ratings, labels)
-    print(ratings_w_descriptions)
-    data = { "x" : days, "y" : ratings_w_descriptions, "labels" : labels}
-    return data
+    #ratings_w_descriptions = add_descriptions(ratings, labels)
+    #print(ratings_w_descriptions)
+    #return { "x" : days, "y" : ratings_w_descriptions, "labels" : labels}
+    return { "x" : days, "y" : ratings, "labels" : labels }
+
+
+@app.route('/get_group_users', methods=['POST', 'GET'])
+def get_group_users():
+    check_login()
+    try:
+        username = session['username']                                          # define username variable
+    except:
+        return redirect('login')
+    group_name = request.args.get('group_name')
+    group_users = db.get_group_dash_data(session['username'], group_name, only_group_users=True)
+    return { "group_users" : group_users }
 
 
 @app.route('/add_user_to_group', methods=['POST', 'GET'])
