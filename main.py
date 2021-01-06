@@ -1,5 +1,5 @@
 #main.py
-from flask import Flask, jsonify, request, render_template, flash, redirect, url_for, session
+from flask import Flask, jsonify, request, render_template, flash, redirect, url_for, session, make_response
 import forms
 from db import validate_login, validate_account_creation, day_info
 import db
@@ -80,8 +80,10 @@ def dash():
     user_preferences = db.get_user_preferences(username)
     dash_info = db.get_dash_info(username)                                      # get user dashboard DayRates
     dash_stats = stats.stat_summary(username, user_preferences['num_ratings_stats'], user_preferences['stat_decimals']) # get user dashboard stats
+    color_options = formats.color_options
     return render_template('dash.html', title="{}'s Dashboard".format(username),# render user dashboard template
-                           dash_info=dash_info, dash_stats=dash_stats)
+                           dash_info=dash_info, dash_stats=dash_stats,
+                           color_options=color_options)
 
 
 @app.route('/dash_data', methods=["GET", "POST"])
@@ -386,6 +388,25 @@ def group_preferences():
         preferences_form.group_num_ratings_stats.data = int(group_preferences_list['group_num_ratings_stats'])
         preferences_form.group_stat_decimals.data = int(group_preferences_list['group_stat_decimals'])
     return render_template('group_preferences.html', form=preferences_form, group_name=group_name)
+
+
+@app.route('/set_cookie', methods=['POST', 'GET'])
+def set_cookie():
+    name = request.args.get('name')
+    value = request.args.get('value')
+    if (name is None) or (value is None):
+        return None
+    response = make_response("Setting a cookie")
+    response.set_cookie(name, value, max_age=60*60*24*365*2)
+    print("set_cookie_color: ", value)
+    return response
+
+
+@app.route('/get_cookie_color', methods=['POST', 'GET'])
+def get_cookie_color():
+    color = request.cookies.get('color')
+    print("get_cookie_color: ", color)
+    return {"color" : color}
 
 
 def check_login():

@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<script src="{{url_for('static', filename='js/group_dash.js')}}"></script>
+<style>
+  .flex-container{
+    text-align: center;
+  }
+</style>
 <h3 style="text-align: center;">{{ group_name }} Dashboard</h3>
 <div class="table-well">
   <table id="index-table" class="display" data-order="[[ 0, &quot;desc&quot; ]]">
@@ -29,7 +36,13 @@
   <div class="legend" id="group-legend"></div>
 
   <div class="ct-chart ct-perfect-fourth"></div>
-
+  <section id="chart-preferences" class="flex-container">
+    <div id="display-area" class="flex-child-first">
+      <h4>Display Areas</h4>
+      <input type="checkbox" id="display-area-check" name="display-area" checked onchange="displayAreas()">
+    </div>
+  </section>
+  <br>
   <script>
     var data = $.get('{{ "/group_dash_data?group_name={}".format(group_name_encoded) }}');
     var extract = data.done(function (response) {

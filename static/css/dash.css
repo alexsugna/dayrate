@@ -1,0 +1,16 @@
+#chart-color-preferences {
+  text-align: center;
+}
+#display-area {
+  text-align: center;
+}
+.flex-container {
+  display: flex;
+  margins: auto;
+}
+.flex-child {
+  flex: 1;
+}
+.flex-child-first{
+  margin-right: 25%;
+}

@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
+<link rel="stylesheet" type="text/css" href={{ url_for('static', filename='css/dash.css') }}>
+<script src="{{url_for('static', filename='js/dash.js')}}"></script>
+
 <h3 style="text-align: center;">Dashboard</h3>
 
 <div style="text-align: center;">
@@ -13,6 +16,19 @@
 </div>
 <body>
   <div class="ct-chart ct-perfect-fourth"></div>
+  <section id="chart-preferences" class="flex-container">
+    <div id="chart-color-preferences" class="flex-child">
+      <h4>Line Color</h4>
+      <select name="colors" id="colors" onchange="changeColors()">
+        {{ color_options|safe }}
+      </select>
+    </div>
+    <div id="display-area" class="flex-child-first">
+      <h4>Display Area</h4>
+      <input type="checkbox" id="display-area-check" name="display-area" checked onchange="displayArea()">
+    </div>
+  </section>
+  <br>
   <div class="table-well">
     <table id="index-table" class="display" data-order="[[ 0, &quot;desc&quot; ]]">
       <thead>
@@ -34,11 +50,21 @@
     </table>
   </div>
   <script>
+
     var data = $.get('dash_data');
     var extract = data.done(function (response) {
       var obj = new BasicChart(response.x, response.y, "Days", "Rating");
       obj.createGraph();
     })
+    function checkContainer () {
+      if($('.ct-series-a').is(':visible')){ //if the container is visible on the page
+        setColor();
+      } else {
+        setTimeout(checkContainer, 50); //wait 50 ms, then try again
+        console.log("wait!");
+      }
+    }
+    checkContainer();
   </script>
 </body>
 {% endblock %}
