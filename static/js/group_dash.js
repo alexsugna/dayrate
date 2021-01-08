@@ -13,7 +13,7 @@ function displayAreas() {
     area.style.display = display;
   }
 }
-
-function changeColors(username){
-  
-}
+// 
+// function changeColors(username){
+//
+// }

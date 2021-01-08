@@ -33,6 +33,7 @@ class CreateAccountForm(FlaskForm):
 class PickDayForm(FlaskForm):
     day = DateField('Day', format=formats.date, validators=[OptionalIfFieldEqualTo('today', value=True)])
     today = BooleanField('Today')
+    yesterday = BooleanField('Yesterday')
     submit = SubmitField('Choose Day')
 
 class DayRateForm(FlaskForm):
