@@ -1,0 +1,14 @@
+div.table-well {
+  max-width: 95%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+th.comments {
+  word-wrap: break-word;
+  max-width: 150px;
+}
+td.comments {
+  word-wrap: break-word;
+  max-width: 150px;
+}

@@ -427,6 +427,11 @@ def get_cookie_color():
     return {"color" : color}
 
 
+@app.route('/reminders', methods=['POST', 'GET'])
+def reminders():
+    return render_template('reminders.html')
+
+
 def check_login():
     if 'username' in session:
         return
